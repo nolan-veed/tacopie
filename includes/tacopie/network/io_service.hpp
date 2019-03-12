@@ -76,6 +76,15 @@ public:
   //!
   void set_nb_workers(std::size_t nb_threads);
 
+  //!
+  //! Query if this context is the same as one of the nb worker threads.
+  //!
+  //! This is useful to debug or detect when a Redis operation is being peformed
+  //! in the context of a callback from one of the nb worker threads as opposed to
+  //! an application context.
+  //!
+  bool is_nb_worker_context();
+
 public:
   //! callback handler typedef
   //! called on new socket event if register to io_service

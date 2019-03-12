@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <sstream>
 #include <tacopie/utils/logger.hpp>
 #include <tacopie/utils/thread_pool.hpp>
 
@@ -47,7 +48,10 @@ thread_pool::~thread_pool(void) {
 
 void
 thread_pool::run(void) {
-  __TACOPIE_LOG(debug, "start run() worker");
+  std::string message("start run() worker thread id: ");
+  std::stringstream idStream;
+  idStream << std::this_thread::get_id();
+  __TACOPIE_LOG(debug, message + idStream.str());
 
   while (true) {
     auto res     = fetch_task_or_stop();
@@ -74,7 +78,9 @@ thread_pool::run(void) {
     }
   }
 
-  __TACOPIE_LOG(debug, "stop run() worker");
+  message = "stop run() worker";
+  __TACOPIE_LOG(debug, message + idStream.str());
+
 }
 
 //!
@@ -171,6 +177,22 @@ thread_pool::set_nb_threads(std::size_t nb_threads) {
   if (m_nb_running_threads > m_max_nb_threads) {
     m_tasks_condvar.notify_all();
   }
+}
+
+bool
+thread_pool::is_worker_thread_id(const std::thread::id& id) {
+  std::unique_lock<std::mutex> lock(m_tasks_mtx);
+  bool id_is_worker = false;
+
+  // Might be better to put the IDs in a hash
+  for (auto& worker : m_workers) { 
+    if (worker.get_id() == id) {
+      id_is_worker = true;
+      break;
+    }
+  }
+
+  return(id_is_worker);
 }
 
 } // namespace utils
