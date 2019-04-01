@@ -92,6 +92,14 @@ io_service::set_nb_workers(std::size_t nb_threads) {
   m_callback_workers.set_nb_threads(nb_threads);
 }
 
+//!
+//! Is this worker thread context
+//!
+bool
+io_service::is_nb_worker_context() {
+  return(m_callback_workers.is_worker_thread_id(std::this_thread::get_id()));
+}
+
 
 //!
 //! poll worker function
