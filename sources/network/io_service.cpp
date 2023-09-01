@@ -177,7 +177,7 @@ io_service::process_rd_event(const fd_t& fd, tracked_socket& socket) {
 
   socket.is_executing_rd_callback = true;
 
-  m_callback_workers << [=] {
+  m_callback_workers << [=, this] {
     __TACOPIE_LOG(debug, "execute read callback");
     rd_callback(fd);
 
@@ -207,7 +207,7 @@ io_service::process_wr_event(const fd_t& fd, tracked_socket& socket) {
 
   socket.is_executing_wr_callback = true;
 
-  m_callback_workers << [=] {
+  m_callback_workers << [=, this] {
     __TACOPIE_LOG(debug, "execute write callback");
     wr_callback(fd);
 
