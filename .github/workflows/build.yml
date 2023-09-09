@@ -29,15 +29,15 @@ jobs:
         build_type: [Release]
         cpp_compiler: [g++, clang++, cl]
         include:
-          - os: windows-latest
-            cpp_compiler: cl
           - os: ubuntu-latest
             cpp_compiler: g++
-        exclude:
           - os: ubuntu-latest
             cpp_compiler: clang++
           - os: windows-latest
-            cpp_compiler: gcc++
+            cpp_compiler: cl
+        exclude:
+          - os: windows-latest
+            cpp_compiler: g++
           - os: windows-latest
             cpp_compiler: clang++
           - os: ubuntu-latest
