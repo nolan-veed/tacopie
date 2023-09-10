@@ -49,3 +49,7 @@ Debug/
 
 # bazel
 bazel-*
+
+# CLion
+.idea/
+cmake-build-debug/
