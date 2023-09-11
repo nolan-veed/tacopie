@@ -25,7 +25,7 @@
 ###
 cmake_minimum_required(VERSION 3.22.1)
 set(CMAKE_MACOSX_RPATH 1)
-include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
+include(FetchContent)
 
 
 ###
@@ -47,31 +47,31 @@ project(${PROJECT} CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 IF (MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /O2 /bigobj")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /O2 /bigobj")
 
-  # was causing conflics with gtest build
-  string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+    # was causing conflics with gtest build
+    string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
 
-  IF ("${MSVC_RUNTIME_LIBRARY_CONFIG}" STREQUAL "")
-    set(MSVC_RUNTIME_LIBRARY_CONFIG "/MT")
-  ENDIF()
+    IF ("${MSVC_RUNTIME_LIBRARY_CONFIG}" STREQUAL "")
+        set(MSVC_RUNTIME_LIBRARY_CONFIG "/MT")
+    ENDIF ()
 
-  foreach (flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
-    IF ("${MSVC_RUNTIME_LIBRARY_CONFIG}" STREQUAL "/MT")
-      string(REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-    ELSEIF ("${MSVC_RUNTIME_LIBRARY_CONFIG}" STREQUAL "/MD")
-      string(REPLACE "/MT" "/MD" ${flag_var} "${${flag_var}}")
-    ELSE ()
-      string(REPLACE "/MD" "${MSVC_RUNTIME_LIBRARY_CONFIG}" ${flag_var} "${${flag_var}}")
-      string(REPLACE "/MT" "${MSVC_RUNTIME_LIBRARY_CONFIG}" ${flag_var} "${${flag_var}}")
-    ENDIF()
-  endforeach()
+    foreach (flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
+        IF ("${MSVC_RUNTIME_LIBRARY_CONFIG}" STREQUAL "/MT")
+            string(REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+        ELSEIF ("${MSVC_RUNTIME_LIBRARY_CONFIG}" STREQUAL "/MD")
+            string(REPLACE "/MT" "/MD" ${flag_var} "${${flag_var}}")
+        ELSE ()
+            string(REPLACE "/MD" "${MSVC_RUNTIME_LIBRARY_CONFIG}" ${flag_var} "${${flag_var}}")
+            string(REPLACE "/MT" "${MSVC_RUNTIME_LIBRARY_CONFIG}" ${flag_var} "${${flag_var}}")
+        ENDIF ()
+    endforeach ()
 
-  add_definitions(-D_UNICODE)
-  add_definitions(-DUNICODE)
-  add_definitions(-DWIN32_LEAN_AND_MEAN)
+    add_definitions(-D_UNICODE)
+    add_definitions(-DUNICODE)
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
 ELSE ()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -O3")
 ENDIF (MSVC)
 
 
@@ -94,20 +94,20 @@ include_directories(${TACOPIE_INCLUDES})
 set(SRC_DIRS "sources" "sources/network" "sources/network/common" "sources/utils" "includes/tacopie" "includes/tacopie/network" "includes/tacopie/utils")
 
 IF (WIN32)
-  set(SRC_DIRS ${SRC_DIRS} "sources/network/windows")
+    set(SRC_DIRS ${SRC_DIRS} "sources/network/windows")
 ELSE ()
-  set(SRC_DIRS ${SRC_DIRS} "sources/network/unix")
+    set(SRC_DIRS ${SRC_DIRS} "sources/network/unix")
 ENDIF (WIN32)
 
-foreach(dir ${SRC_DIRS})
-  # get directory sources and headers
-  file(GLOB s_${dir} "${dir}/*.cpp")
-  file(GLOB h_${dir} "${dir}/*.hpp")
-  file(GLOB i_${dir} "${dir}/*.ipp")
+foreach (dir ${SRC_DIRS})
+    # get directory sources and headers
+    file(GLOB s_${dir} "${dir}/*.cpp")
+    file(GLOB h_${dir} "${dir}/*.hpp")
+    file(GLOB i_${dir} "${dir}/*.ipp")
 
-  # set sources
-  set(SOURCES ${SOURCES} ${s_${dir}} ${h_${dir}} ${i_${dir}})
-endforeach()
+    # set sources
+    set(SOURCES ${SOURCES} ${s_${dir}} ${h_${dir}} ${i_${dir}})
+endforeach ()
 
 
 ###
@@ -132,36 +132,36 @@ add_library(${PROJECT} ${SOURCES})
 set_property(TARGET ${PROJECT} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 IF (WIN32)
-   set_target_properties(${PROJECT}
-                         PROPERTIES COMPILE_PDB_NAME ${PROJECT}
-                         COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+    set_target_properties(${PROJECT}
+            PROPERTIES COMPILE_PDB_NAME ${PROJECT}
+            COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 ENDIF (WIN32)
 
 IF (WIN32)
-  target_link_libraries(${PROJECT} ws2_32)
+    target_link_libraries(${PROJECT} ws2_32)
 ELSE ()
-  target_link_libraries(${PROJECT} pthread)
+    target_link_libraries(${PROJECT} pthread)
 ENDIF (WIN32)
 
 # __TACOPIE_LOGGING_ENABLED
 IF (LOGGING_ENABLED)
-  set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_LOGGING_ENABLED=${LOGGING_ENABLED}")
+    set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_LOGGING_ENABLED=${LOGGING_ENABLED}")
 ENDIF (LOGGING_ENABLED)
 
 # __TACOPIE_CONNECTION_QUEUE_SIZE
 IF (CONNECTION_QUEUE_SIZE)
-  set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_CONNECTION_QUEUE_SIZE=${CONNECTION_QUEUE_SIZE}")
+    set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_CONNECTION_QUEUE_SIZE=${CONNECTION_QUEUE_SIZE}")
 ENDIF (CONNECTION_QUEUE_SIZE)
 
 #__TACOPIE_IO_SERVICE_NB_WORKERS
 IF (IO_SERVICE_NB_WORKERS)
-  set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_IO_SERVICE_NB_WORKERS=${IO_SERVICE_NB_WORKERS}")
-ENDIF(IO_SERVICE_NB_WORKERS)
+    set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_IO_SERVICE_NB_WORKERS=${IO_SERVICE_NB_WORKERS}")
+ENDIF (IO_SERVICE_NB_WORKERS)
 
 #__TACOPIE_TIMEOUT
 IF (SELECT_TIMEOUT)
-  set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_TIMEOUT=${SELECT_TIMEOUT}")
-ENDIF(SELECT_TIMEOUT)
+    set_property(TARGET ${PROJECT} APPEND_STRING PROPERTY COMPILE_DEFINITIONS " __TACOPIE_TIMEOUT=${SELECT_TIMEOUT}")
+ENDIF (SELECT_TIMEOUT)
 
 
 ###
@@ -180,17 +180,19 @@ install(DIRECTORY ${TACOPIE_INCLUDES}/ DESTINATION include USE_SOURCE_PERMISSION
 # examples
 ###
 IF (BUILD_EXAMPLES)
-  add_subdirectory(examples)
-ENDIF(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+ENDIF (BUILD_EXAMPLES)
 
 
 ###
 # tests
 ###
 IF (BUILD_TESTS)
-  add_subdirectory(tests)
-  ExternalProject_Add("googletest"
-                      GIT_REPOSITORY "https://github.com/google/googletest.git"
-                      GIT_TAG "main"
-                      CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/deps")
-ENDIF(BUILD_TESTS)
+    add_subdirectory(tests)
+    FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG v3.4.0
+    )
+    FetchContent_MakeAvailable(Catch2)
+ENDIF (BUILD_TESTS)
